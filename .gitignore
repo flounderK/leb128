@@ -1,7 +1,10 @@
 # Prerequisites
 *.d
 
+*.swp
+
 # Object files
+obj/**
 *.o
 *.ko
 *.obj
