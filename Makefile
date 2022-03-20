@@ -30,7 +30,7 @@ obj/src/%.o: src/%.c
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(BINARY): obj/src/main.o obj/src/leb128.o
+$(BINARY): obj/src/main.o obj/src/uleb128.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 release:

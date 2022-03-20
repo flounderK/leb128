@@ -3,10 +3,34 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "leb128.h"
 
-uleb128_t uleb128_decode(uint8_t * stream, uint8_t** saveptr){
-    uleb128_t res = 0;
+
+#ifndef T
+#include "uleb128.h"
+#define T uint8_t
+#include "uleb128.c"
+
+#define T uint16_t
+#include "uleb128.c"
+
+#define T uint32_t
+#include "uleb128.c"
+
+#define T uint64_t
+#include "uleb128.c"
+
+#define T size_t
+#endif
+
+#ifndef POSTFIX
+# define POSTFIX T
+#endif
+#define CCAT2(x, y) x ## _ ## y
+#define CCAT(x, y) CCAT2(x, y)
+#define FN(x) CCAT(x, POSTFIX)
+
+T FN(uleb128_decode)(uint8_t * stream, uint8_t** saveptr){
+    T res = 0;
     size_t shift = 0;
     if (stream == NULL){
         perror("uleb128_decode NULL argument");
@@ -20,7 +44,7 @@ uleb128_t uleb128_decode(uint8_t * stream, uint8_t** saveptr){
     size_t ind = 0;
     uint8_t byte = 0;
     while (1){
-        if (ind > sizeof(uleb128_t)){
+        if (ind > sizeof(T)){
             perror("uleb128_decode value too large for this type");
             goto exit;
         }
@@ -38,7 +62,7 @@ uleb128_t uleb128_decode(uint8_t * stream, uint8_t** saveptr){
 exit:
     return res;
 }
-
+# if 0
 size_t sleb128_encode(sleb128_t value,
                       uint8_t* buffer,
                       size_t buffer_size){
@@ -65,8 +89,9 @@ size_t sleb128_encode(sleb128_t value,
 
     return ind;
 }
+# endif
 
-size_t uleb128_encode(uleb128_t value,
+size_t FN(uleb128_encode)(T value,
                       uint8_t* buffer,
                       size_t buffer_size){
     uint8_t byte = 0;
@@ -91,7 +116,7 @@ exit:
 }
 
 
-uint8_t* uleb128_alloc_encode(uleb128_t value, size_t* count){
+uint8_t* FN(uleb128_alloc_encode)(T value, size_t* count){
     uint8_t* result_buf = NULL;
     if (count == NULL){
         perror("uleb128_encode count is NULL");
@@ -103,10 +128,15 @@ uint8_t* uleb128_alloc_encode(uleb128_t value, size_t* count){
         goto exit;
     }
 
-    *count = uleb128_encode(value, result_buf, MAX_MALLOC_ULEB_STREAM_LEN);
+    *count = FN(uleb128_encode)(value, result_buf, MAX_MALLOC_ULEB_STREAM_LEN);
 
 exit:
     return result_buf;
 }
 
+#undef T
+#undef PREFIX
+#undef CCAT2
+#undef CCAT
+#undef FN
 
