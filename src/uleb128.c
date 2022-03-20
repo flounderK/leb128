@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <string.h>
 
 #ifndef T
 #include "uleb128.h"
@@ -127,6 +127,7 @@ uint8_t* FN(uleb128_alloc_encode)(T value, size_t* count){
         perror("uleb128_encode malloc");
         goto exit;
     }
+    memset(result_buf, 0, MAX_MALLOC_ULEB_STREAM_LEN);
 
     *count = FN(uleb128_encode)(value, result_buf, MAX_MALLOC_ULEB_STREAM_LEN);
 
